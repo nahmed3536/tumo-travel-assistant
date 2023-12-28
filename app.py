@@ -120,10 +120,9 @@ def assistant(prompt: str) -> str:
         "Example: prompt is 'what are some hotels', answer is 'hotel'. "
         "Example: prompt is 'tell me some history', answer is 'other'. "
     )
-    results
     for _ in range(3):
         results = chatgpt(prompt, instructions).lower().strip()
-        if results in ["hotels", "restaurants", "sightseeing", "other"]
+        if results in ["hotels", "restaurants", "sightseeing", "other"]:
             break
     else:
         results = "other"
@@ -132,6 +131,7 @@ def assistant(prompt: str) -> str:
         context = (
             f"You're a friendly travel agent working with a person named {st.session_state.user_name}. "
             f"Answer the user's question. They are planning to travel to {st.session_state.country}. "
+            f"Keep the answer conversational and informal in style and avoid very long answers."
             f"Make sure to refer to the person by their name, {st.session_state.user_name}, and related your answer to {st.session_state.country}. "
             "For non-travel or related questions, please don't answer. Respond with 'I can only answer travel-related questions'"
             "Thank you!"
@@ -232,7 +232,7 @@ if st.session_state.messages[-1]["role"] != "assistant":
                 for img in images:
                     st.image(img)
     
-    message = {"role": "assistant", "images": [], "content": response}
+    message = {"role": "assistant", "images": images, "content": response}
     st.session_state.messages.append(message)
 
 
