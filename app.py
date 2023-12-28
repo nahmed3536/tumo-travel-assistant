@@ -131,12 +131,12 @@ def assistant(prompt: str) -> str:
         context = (
             f"You're a friendly travel agent working with a person named {st.session_state.user_name}. "
             f"Answer the user's question. They are planning to travel to {st.session_state.country}. "
-            f"Keep the answer conversational and informal in style and avoid very long answers."
+            f"Keep the answer conversational and informal in style and avoid very long answers (max 200 words)."
             f"Make sure to refer to the person by their name, {st.session_state.user_name}, and related your answer to {st.session_state.country}. "
             "For non-travel or related questions, please don't answer. Respond with 'I can only answer travel-related questions'"
             "Thank you!"
         )
-        return chatgpt(prompt, context)
+        return chatgpt(prompt, context), dalle(f"give an image of {st.session_state.country} related to {prompt}")
     
     if results == "hotels":
         _data = travel_data.list_of_hotels
@@ -153,9 +153,9 @@ def assistant(prompt: str) -> str:
         name, desc, address = i
         response += f"\n\n1. **{name}**: {desc}. The address is {address}"
 
-    response += f"\n\nLet me know if you need more recommendations for {st.session_state.country}! I'm happy to help {st.session_state.user_name}!"
+    response += f"\n\nLet me know if you need more recommendations for {travel_data.countries_to_proper[st.session_state.country]}! I'm happy to help {st.session_state.user_name}!"
 
-    return response
+    return response, None
 
 context = ""
 
@@ -238,7 +238,10 @@ if st.session_state.messages[-1]["role"] != "assistant":
                     else:
                         response = "I couldn't catch which country you'd be interested in - could you share a country you are interest in? The countries I can provide information are: Armenia, France, Italy, Spain, Germany, USA, UK, Brazil, Greece, Singapore, Australia, China, UAE, and Canada."
                 else:
-                    response = assistant(prompt)
+                    response, image = assistant(prompt)
+                    if image:
+                        images.append(image)
+
             st.write(response)
             if images != []:
                 for img in images:
