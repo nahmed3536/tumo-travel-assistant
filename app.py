@@ -136,13 +136,19 @@ def assistant(prompt: str) -> str:
             "For non-travel or related questions, please don't answer. Respond with 'I can only answer travel-related questions'"
             "Thank you!"
         )
-        response = chatgpt(prompt, context)
+        return chatgpt(prompt, context)
+    
     if results == "hotels":
+        _data = travel_data.list_of_hotels
         response = "Here are some popular hotels 🏨: "
     if results == "restaurants":
+        _data = travel_data.list_of_restaurants
         response = "Here are some popular restaurants 🍜 🍝 🍮: "
     if results == "sightseeing":
+        _data = travel_data.list_of_places
         response = "Here are some popular sights to see 🗺: "
+
+
     return response
 
 context = ""
@@ -171,7 +177,7 @@ for message in st.session_state.messages:
     with st.chat_message(message["role"], avatar=config["custom"][f"{message['role']}_avatar"]):
         st.write(message["content"])
         if message["images"] != []:
-            for img in images:
+            for img in message["images"]:
                 st.image(img)
 
 # User-provided prompt
