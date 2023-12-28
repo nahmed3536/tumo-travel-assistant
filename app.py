@@ -32,7 +32,7 @@ def pretty_print_dict(dictionary):
 import toml
 config = toml.load(".streamlit/config.toml")
 
-### OpenAI's ChatGPT API ###
+### OpenAI's ChatGPT and DALLE API ###
 import os
 import openai
 
@@ -55,6 +55,16 @@ def chatgpt(prompt: str, context: str = "You are a helpful assistant.", model: s
         model=model,
     )
     return response.choices[0].message.content
+
+def dalle(prompt: str) -> str:
+    response = openai_client.images.generate(
+        model="dall-e-2",
+        prompt=prompt,
+        size="256x256",
+        quality="standard",
+        n=1,
+    )
+    return response.data[0].url
 
 ### CUSTOM ASSISTANT CODE ###
 import travel_data
@@ -100,11 +110,12 @@ def identify_country(prompt):
         return "not supported"
     return identified_country
 
-def assistant(prompt: str, user_name: str) -> str:
+def assistant(prompt: str) -> str:
     """
     Personalized response based on the prompt
     """
-    st.button("hello")
+    st.info(st.session_state.user_name)
+    st.info(st.session_state.country)
     return "testing"
     # identify if they want a random country
     identify_user_wants_random_country = (
@@ -151,6 +162,7 @@ if "country" not in st.session_state: st.session_state.country = None
 if "messages" not in st.session_state.keys():
     st.session_state.messages = [{
         "role": "assistant", 
+        "images": [],
         "content": (
             "Hello, I'm GPTour and I'm here to help with your travels. "
             "Before we begin, what is your name?"
@@ -161,10 +173,13 @@ if "messages" not in st.session_state.keys():
 for message in st.session_state.messages:
     with st.chat_message(message["role"], avatar=config["custom"][f"{message['role']}_avatar"]):
         st.write(message["content"])
+        if message["images"] != []:
+            for img in images:
+                st.image(img)
 
 # User-provided prompt
 if prompt := st.chat_input():
-    st.session_state.messages.append({"role": "user", "content": prompt})
+    st.session_state.messages.append({"role": "user", "images": [], "content": prompt})
     with st.chat_message("user", avatar=config["custom"]["user_avatar"]):
         st.write(prompt)
 
@@ -172,6 +187,7 @@ if prompt := st.chat_input():
 if st.session_state.messages[-1]["role"] != "assistant":
     with st.chat_message("assistant", avatar=config["custom"]["assistant_avatar"]):
         with st.spinner("Thinking..."):
+            images = []
             if not st.session_state.user_name:
                 # first identify for the user's names
                 user_name = identify_user(prompt)
@@ -206,15 +222,20 @@ if st.session_state.messages[-1]["role"] != "assistant":
                         st.session_state.country = country
                         response = (
                             f"I would love give more information on {travel_data.countries_to_proper[st.session_state.country]} {travel_data.countries_to_emoji[st.session_state.country]}! "
-                            "\n\nI can give recommendations for sightseeing, hotels, and restaurants!"
+                            f"\n\nI can give recommendations for sightseeing, hotels, and restaurants!"
+                            f"\n\nHere's a picture of what traveling to {travel_data.countries_to_proper[st.session_state.country]} might entail:"
                         )
+                        images.append(dalle(f"A beautiful, travel picture for {st.session_state.country}. Make it sunny and gorgeous please and feature an iconic landmark!"))
                     else:
                         response = "I couldn't catch which country you'd be interested in - could you share a country you are interest in? The countries I can provide information are: Armenia, France, Italy, Spain, Germany, USA, UK, Brazil, Greece, Singapore, Australia, China, UAE, and Canada."
                 else:
-                    response = assistant(prompt, st.session_state.user_name)
+                    response = assistant(prompt)
             st.write(response)
+            if images != []:
+                for img in images:
+                    st.image(img)
     
-    message = {"role": "assistant", "content": response}
+    message = {"role": "assistant", "images": [], "content": response}
     st.session_state.messages.append(message)
 
 
