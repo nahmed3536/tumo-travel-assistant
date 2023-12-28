@@ -19,8 +19,8 @@ list_of_restaurants = {
 """
 
 
-countries = ["Armenia", "France", "Italy", "Spain", "Germany", "USA", "UK", "Brazil", "Greece", "Singapore", "Australia", "China", "UAE", "Canada"]
-
+countries_proper = ["Armenia", "France", "Italy", "Spain", "Germany", "USA", "UK", "Brazil", "Greece", "Singapore", "Australia", "China", "UAE", "Canada"]
+countries = [c.lower() for c in countries_proper]
 
 list_of_places = {
     "armenia":[
