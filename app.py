@@ -114,39 +114,36 @@ def assistant(prompt: str) -> str:
     """
     Personalized response based on the prompt
     """
-    st.info(st.session_state.user_name)
-    st.info(st.session_state.country)
-    return "testing"
-    # identify if they want a random country
-    identify_user_wants_random_country = (
-        "Given the prompt, answer 'yes' if the user wants to explore, learn about a random country, or is unsure / doesn't know. "
-        "Answer 'no' otherwise or any in other situation. The only answers is 'yes' and 'no'."
+    instructions = (
+        "Given the prompt, identify if the user wants to learn about hotels, restaurants, or sightseeing. "
+        "Only answer with 'hotels', 'restaurants', 'sightseeing', or 'other'. "
+        "Example: prompt is 'what are some hotels', answer is 'hotel'. "
+        "Example: prompt is 'tell me some history', answer is 'other'. "
     )
-    wants_random_country = chatgpt(prompt, identify_user_wants_random_country).strip().lower()
+    results
+    for _ in range(3):
+        results = chatgpt(prompt, instructions).lower().strip()
+        if results in ["hotels", "restaurants", "sightseeing", "other"]
+            break
+    else:
+        results = "other"
 
-    if wants_random_country == "yes":
-        st.session_state.country = random.choice(travel_data.countries)
-        response = (
-            f"Here's a great country to visit: {st.session_state.country} {travel_data.countries_to_emoji[st.session_state.country]}!"
-            f"\n\nWhat would like to know about this country - I can give you recommendations for sightseeing, hotels, and restaurants!"
+    if results == "other":
+        context = (
+            f"You're a friendly travel agent working with a person named {st.session_state.user_name}. "
+            f"Answer the user's question. They are planning to travel to {st.session_state.country}. "
+            f"Make sure to refer to the person by their name, {st.session_state.user_name}, and related your answer to {st.session_state.country}. "
+            "For non-travel or related questions, please don't answer. Respond with 'I can only answer travel-related questions'"
+            "Thank you!"
         )
-
-    # identify the country if there is one
-    identify_country_instruction = (
-        "Given the prompt, identify what country the user is asking about. "
-        "Answer only with the country identified. "
-        "If there's no country that can be determined, answer with 'none'. "
-        "For example, if the prompt is 'i want to learn more about china', answer with 'china'. "
-        "For example, if the prompt is 'what are some hotels', answer with 'none'"
-    )
-    identified_country = chatgpt(prompt, identify_country_instruction).strip().lower()
-
-    return identified_country
-
-    # if identified_country != st.session_state.country:
-    #     st.session_state.country = 
-
-    return "Not Programmed Yet!"
+        response = chatgpt(prompt, context)
+    if results == "hotels":
+        response = "Here are some popular hotels 🏨: "
+    if results == "restaurants":
+        response = "Here are some popular restaurants 🍜 🍝 🍮: "
+    if results == "sightseeing":
+        response = "Here are some popular sights to see 🗺: "
+    return response
 
 context = ""
 
