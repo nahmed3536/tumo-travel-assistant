@@ -6,4 +6,5 @@ textColor="#265237"
 font="serif"
 
 [custom]
-assistant_avatar=
+assistant_avatar="https://raw.githubusercontent.com/nahmed3536/tumo-travel-assistant/main/images/travel_agent_icon.png"
+user_avatar="https://raw.githubusercontent.com/nahmed3536/tumo-travel-assistant/main/images/traveller_icon.png"
