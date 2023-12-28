@@ -148,6 +148,12 @@ def assistant(prompt: str) -> str:
         _data = travel_data.list_of_places
         response = "Here are some popular sights to see 🗺: "
 
+    _data_content = random.sample(_data[st.session_state.country], 5)
+    for i in _data_content:
+        name, desc, address = i
+        response += f"\n\n1. **{name}**: {desc}. The address is {address}"
+
+    response += f"\n\nLet me know if you need more recommendations for {st.session_state.country}! I'm happy to help {st.session_state.user_name}!"
 
     return response
 
