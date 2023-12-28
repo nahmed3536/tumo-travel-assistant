@@ -83,29 +83,22 @@ def identify_user(prompt: str) -> Optional[str]:
         log.info(f"Couldn't parse prompt = {prompt} for name. Found error: {e}")
 
 
-def initial_travel_message():
-    response = (
-        f"Welcome {st.session_state.user_name}! I'm here to help you with your travels! ✈️ 🏨 🧳\n\n"
-        "What country would be interested in learning more about? "
-        "If you're unsure or curious, I can recommend a country for your travels! "
+def identify_country(prompt):
+    # identify the country if there is one
+    identify_country_instruction = (
+        "Given the prompt, identify what country the user is asking about. "
+        "Answer only with the country identified. "
+        "If there's no country that can be determined, answer with 'none'. "
+        "For example, if the prompt is 'i want to learn more about china', answer with 'china'. "
+        "For example, if the prompt is 'what are some hotels', answer with 'none'"
     )
-    st.write(response)
+    identified_country = chatgpt(prompt, identify_country_instruction).strip().lower()
 
-    selected_country = st.selectbox(
-        "Pick a country", 
-        options=travel_data.countries_proper + ["Random"],
-        label_visibility="hidden",
-        index=None,
-        placeholder="Select a country"
-    )
-    if selected_country == None:
-        pass
-    elif selected_country == "Random":
-        st.info(random.choice(travel_data.countries))
-    else:
-        st.info(selected_country.lower())
-
-    return ""
+    if identified_country == 'none':
+        return None
+    if identified_country not in travel_data.countries:
+        return "not supported"
+    return identified_country
 
 def assistant(prompt: str, user_name: str) -> str:
     """
@@ -179,7 +172,6 @@ if prompt := st.chat_input():
 if st.session_state.messages[-1]["role"] != "assistant":
     with st.chat_message("assistant", avatar=config["custom"]["assistant_avatar"]):
         with st.spinner("Thinking..."):
-            st.info(st.session_state.country)
             if not st.session_state.user_name:
                 # first identify for the user's names
                 user_name = identify_user(prompt)
@@ -206,8 +198,20 @@ if st.session_state.messages[-1]["role"] != "assistant":
                     )
             else:
                 if not st.session_state.country:
-                    
-                response = assistant(prompt, st.session_state.user_name)
+                    country = identify_country(prompt)
+
+                    if country == "not supported":
+                        response = "I'm sorry, but at the moment, I don't support or provide information on this country! The countries I can provide information are: Armenia, France, Italy, Spain, Germany, USA, UK, Brazil, Greece, Singapore, Australia, China, UAE, and Canada."
+                    elif country and not st.session_state.country:
+                        st.session_state.country = country
+                        response = (
+                            f"I would love give more information on {travel_data.countries_to_proper[st.session_state.country]} {travel_data.countries_to_emoji[st.session_state.country]}! "
+                            "\n\nI can give recommendations for sightseeing, hotels, and restaurants!"
+                        )
+                    else:
+                        response = "I couldn't catch which country you'd be interested in - could you share a country you are interest in? The countries I can provide information are: Armenia, France, Italy, Spain, Germany, USA, UK, Brazil, Greece, Singapore, Australia, China, UAE, and Canada."
+                else:
+                    response = assistant(prompt, st.session_state.user_name)
             st.write(response)
     
     message = {"role": "assistant", "content": response}

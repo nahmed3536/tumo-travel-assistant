@@ -21,6 +21,7 @@ list_of_restaurants = {
 
 countries_proper = ["Armenia", "France", "Italy", "Spain", "Germany", "USA", "UK", "Brazil", "Greece", "Singapore", "Australia", "China", "UAE", "Canada"]
 countries = [c.lower() for c in countries_proper]
+countries_to_proper = {i: j for i, j in zip(countries, countries_proper)}
 
 list_of_places = {
     "armenia":[
