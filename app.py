@@ -136,7 +136,11 @@ if st.session_state.messages[-1]["role"] != "assistant":
                     ]
                     response = random.choice(possible_name_follow_ups)
                 else:
-                    response = f"Welcome {st.session_state.user_name}! I'm here to help you with your travels! ✈️ 🏨 🧳"
+                    response = (
+                        f"Welcome {st.session_state.user_name}! I'm here to help you with your travels! ✈️ 🏨 🧳\n\n"
+                        "What country would be interested in learning more about? "
+                        "If you're unsure or curious, I can recommend a country for your travels! "
+                    )
             else:
                 response = assistant(prompt, context)
             
